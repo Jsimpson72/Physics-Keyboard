@@ -17,7 +17,7 @@
         }
         .key {
             margin: 5px;
-            padding: 10px 20px;
+            padding: 10px;
             font-size: 18px;
             background: #007bff;
             color: white;
@@ -34,9 +34,6 @@
         .action-key:hover {
             background: #5a6268;
         }
-        .button-container {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -47,7 +44,7 @@
         <button class="key" onclick="sendInput('=')">=</button>
         <button class="key" onclick="sendInput('2')">2</button>
     </div>
-    <div class="button-container">
+    <div>
         <button class="key action-key" onclick="sendClear()">Clear</button>
         <button class="key action-key" onclick="sendValidate()">Validate</button>
     </div>
