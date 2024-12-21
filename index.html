@@ -41,7 +41,6 @@
 </head>
 <body>
     <h1>Physics Keyboard</h1>
-    <p>Type your formula and validate:</p>
     <input id="keyboardInput" class="input-field" readonly />
     <div>
         <button onclick="addKey('a')">a</button>
@@ -58,27 +57,24 @@
         const inputField = document.getElementById("keyboardInput");
         const feedback = document.getElementById("feedback");
 
-        // Append key to the input
         function addKey(key) {
             inputField.value += key;
         }
 
-        // Clear the input field
         function clearInput() {
             inputField.value = '';
             feedback.textContent = '';
         }
 
-        // Validate input and send result to the parent page
         function validate() {
             const input = inputField.value.trim();
-            const isValid = input === "a+b=2"; // Example validation logic
+            const isValid = input === "a+b=2"; // Replace with actual validation logic
 
             if (isValid) {
                 feedback.textContent = "Correct! Entry validated.";
                 feedback.style.color = "green";
 
-                // Send validated input to parent page
+                // Send validated input to parent
                 parent.postMessage({ action: "input", value: input }, "*");
             } else {
                 feedback.textContent = "Incorrect. Please try again.";
