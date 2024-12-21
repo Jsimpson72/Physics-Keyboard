@@ -71,12 +71,18 @@
 
         // Validate input and send result to the parent page
         function validate() {
-            const isValid = inputField.value.trim() === "a+b=2"; // Example validation logic
+            const input = inputField.value.trim();
+            const isValid = input === "a+b=2"; // Example validation logic
 
             if (isValid) {
                 feedback.textContent = "Correct! Entry validated.";
                 feedback.style.color = "green";
-                parent.postMessage({ action: "input", value: inputField.value }, "*");
+
+                // Send validated input to parent page
+                parent.postMessage({ action: "input", value: input }, "*");
+
+                // Optional: clear input after validation or close keyboard
+                inputField.value = '';
             } else {
                 feedback.textContent = "Incorrect. Please try again.";
                 feedback.style.color = "red";
