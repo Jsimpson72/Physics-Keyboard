@@ -3,33 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Keyboard</title>
+    <title>Physics Keyboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-
-        .keyboard-container {
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
             justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f4f4f4;
         }
-
         .key {
-            padding: 15px;
+            margin: 5px;
+            padding: 10px 20px;
             font-size: 18px;
             background: #007bff;
             color: white;
@@ -37,94 +25,45 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         .key:hover {
             background: #0056b3;
         }
-
         .action-key {
             background: #6c757d;
         }
-
         .action-key:hover {
             background: #5a6268;
         }
-
-        #feedback {
-            margin-top: 10px;
-            font-size: 16px;
-        }
-
-        .valid {
-            color: green;
-        }
-
-        .invalid {
-            color: red;
+        .button-container {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="keyboard-container">
-        <!-- Keys -->
-        <button class="key">a</button>
-        <button class="key">b</button>
-        <button class="key">+</button>
-        <button class="key">=</button>
-        <button class="key">2</button>
-
-        <!-- Action Buttons -->
-        <button id="clear-button" class="key action-key">Clear</button>
-        <button id="validate-button" class="key action-key">Validate</button>
+    <div>
+        <button class="key" onclick="sendInput('a')">a</button>
+        <button class="key" onclick="sendInput('b')">b</button>
+        <button class="key" onclick="sendInput('+')">+</button>
+        <button class="key" onclick="sendInput('=')">=</button>
+        <button class="key" onclick="sendInput('2')">2</button>
+    </div>
+    <div class="button-container">
+        <button class="key action-key" onclick="sendClear()">Clear</button>
+        <button class="key action-key" onclick="sendValidate()">Validate</button>
     </div>
 
-    <!-- Feedback Section -->
-    <div id="feedback"></div>
-
     <script>
-        // Store reference to parent field
-        let inputField = null;
-
-        // Listen for messages from parent page
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'initializeKeyboard') {
-                inputField = event.data.field;
-            }
-        });
-
-        // Update input field in parent
-        function updateParentField(value) {
-            if (inputField) {
-                window.parent.postMessage({ type: 'updateField', value }, '*');
-            }
+        function sendInput(value) {
+            window.parent.postMessage({ action: 'input', value }, '*');
         }
 
-        // Keyboard buttons functionality
-document.querySelectorAll('.key').forEach((key) => {
-    key.addEventListener('click', () => {
-        const value = key.textContent.trim();
-        window.parent.postMessage({ action: 'input', value }, '*');
-    });
-});
+        function sendClear() {
+            window.parent.postMessage({ action: 'clear' }, '*');
+        }
 
-// Clear button functionality
-document.getElementById('clear-button').addEventListener('click', () => {
-    window.parent.postMessage({ action: 'clear' }, '*');
-});
-
-
-        // Validate input
-        document.getElementById('validate-button').addEventListener('click', () => {
-            const fieldValue = inputField || '';
-            const feedback = document.getElementById('feedback');
-            if (fieldValue === 'a+b=2') {
-                feedback.textContent = 'Correct!';
-                feedback.className = 'valid';
-            } else {
-                feedback.textContent = 'Incorrect. Please try again.';
-                feedback.className = 'invalid';
-            }
-        });
+        function sendValidate() {
+            window.parent.postMessage({ action: 'validate' }, '*');
+        }
     </script>
 </body>
 </html>
