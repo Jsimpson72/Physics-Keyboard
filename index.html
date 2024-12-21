@@ -38,28 +38,143 @@
 </head>
 <body>
     <h1>Physics Keyboard</h1>
-    <div>
-        <button class="key" onclick="addKey('a')">a</button>
-        <button class="key" onclick="addKey('+')">+</button>
-        <button class="key" onclick="addKey('b')">b</button>
-        <button class="key" onclick="addKey('=')">=</button>
-        <button class="key" onclick="addKey('2')">2</button>
+    <!-- Validation Button -->
+    <div class="button-container">
+        <button onclick="validate()">Validate</button>
+        <button onclick="clearInput()">Clear</button>
+        <button onclick="backspaceInput()">Backspace</button>
     </div>
-    <div>
-        <button class="validate" onclick="validate()">Validate</button>
-        <button class="clear" onclick="clearInput()">Clear</button>
-        <button onclick="closeKeyboard()">Close</button>
-    </div>
+
+    <!-- Feedback Section -->
+    <div id="feedback"></div>
+
+    <!-- Keyboard Section -->
+    <div class="keyboard-container">
+        <!-- Variables Section -->
+        <div>
+            <div class="section-title">Variables</div>
+            <div class="keyboard-section" id="variables-section"></div>
+        </div>
+
+        <!-- Operations Section -->
+        <div>
+            <div class="section-title">Operations</div>
+            <div class="keyboard-section" id="operations-section"></div>
+        </div>
+
+        <!-- Units Section -->
+        <div>
+            <div class="section-title">Units</div>
+            <div class="keyboard-section" id="units-section"></div>
+        </div>
+
+        <!-- Numbers Section -->
+        <div>
+            <div class="section-title">Numbers</div>
+            <div class="keyboard-section" id="numbers-section"></div>
+        </div>
     <div id="feedback"></div>
 
     <script>
         let currentValue = ''; // Tracks the current input locally
+        // Global declarations
+        const validVariables = [
+            's', 'd', 't', 'v', 'a', 'Δv', 'm', 'h', 'F', 'g', 'p', 'J', 'Δp', 'W', 'PEg', 'KE', 'ME', 'P', 'λ', 'ƒ', 'ν' 
+        ];
 
-        function addKey(key) {
-            currentValue += key;
-            parent.postMessage({ action: 'input', value: currentValue }, '*');
-        }
+        const validFormulas = [
+            "d=st", "d=ts", "d=vt", "d=tv", "d=W/F", "s=d/t", "t=d/s", "t=d/v", "t=J/F", "v=d/t", "v=p/m", "ν=λ/T", 
+            "ν=ƒλ", "v=ƒλ", "ν=λƒ", "v=λƒ", "Δv=at", "Δv=ta", "a=Δv/t", "a=F/m", "F=ma", "F=am", "F=gm", "F=mg", "F=W/d", "F=J/t", 
+            "m=F/a", "m=F/g", "m=p/v", "m=PEg/gh", "m=PEg/hg", "m=Δp/Δv", "p=mv", "p=vm", "Δp=mΔv", "Δp=Δvm", "J=Ft", 
+            "J=tF", "J=Δp", "PEg=mgh", "PEg=ghm", "PEg=mhg", "PEg=gmh", "PEg=hmg", "PEg=hgm", "g=F/m", "g=PEg/mh", 
+            "g=PEg/hm", "h=PEg/mg", "h=PEg/gm", "KE=1/2mv^2", "KE=1/2v^2m", "m=2KE/v^2", "m=KE2/v^2", "v=√2KE/m", 
+            "v=√KE2/m", "ME=PEg+KE", "ME=KE+PEg", "KE=ME-PEg", "PEg=ME-KE", "P=W/t", "t=W/P", "ƒ=1/T", "T=1/ƒ", 
+            "W=Pt", "W=tP", "W=Fd", "W=dF", "λ=ν/ƒ", "ƒ=ν/λ", "t=Δv/a", "Δv=Δp/m", "λ=νT", "λ=Tv", "T=λ/ν"
+        ];
 
+        const substitutionPatterns = {
+            "d=st": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "d=ts": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "d=vt": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "d=tv": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "d=W/F": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "s=d/t": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "t=d/s": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "t=d/v": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "t=J/F": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "v=d/t": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "v=p/m": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "ν=λ/T": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "ν=ƒλ": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "v=ƒλ": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "v=λƒ": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,            
+            "ν=λƒ": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "Δv=at": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "Δv=ta": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "a=Δv/t": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "a=F/m": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/, 
+            "F=ma": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "F=am": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "F=gm": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "F=mg": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+            "F=W/d": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/, 
+            "F=J/t": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/, 
+            "m=F/a": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/, 
+            "m=F/g": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/, 
+            "m=p/v": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/, 
+            "m=PEg/gh": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+            "m=PEg/hg": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+            "m=Δp/Δv": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "p=mv": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "p=vm": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "Δp=mΔv": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+            "Δp=Δvm": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+             "J=Ft": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+             "J=tF": /^\d+(\.\d+)?[a-zA-Z\/²·]+×\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+             "J=Δp": /^\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+             "PEg=mgh": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=ghm": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=mhg": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=gmh": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=hmg": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=hgm": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "g=F/m": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "g=PEg/mh": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "g=PEg/hm": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "h=PEg/mg": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "h=PEg/gm": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "KE=1/2mv^2": /^(1\/2|0\.5)×\d+(\.\d+)?[a-zA-Z]+×\(\d+(\.\d+)?[a-zA-Z\/²]+\)\^2$/,
+             "KE=1/2v^2m": /^(1\/2|0\.5)×\(\d+(\.\d+)?[a-zA-Z\/²]+\)\^2×\d+(\.\d+)?[a-zA-Z]+$/,
+             "m=2KE/v^2": /^2×\d+(\.\d+)?[a-zA-Z]+\/\(\d+(\.\d+)?[a-zA-Z\/²]+\)\^2$/,
+             "m=KE2/v^2": /^\d+(\.\d+)?[a-zA-Z]+×2\/\(\d+(\.\d+)?[a-zA-Z\/²]+\)\^2$/,
+             "v=√2KE/m": /^√\(2×\d+(\.\d+)?[a-zA-Z]+\/\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "v=√KE2/m": /^√\(\d+(\.\d+)?[a-zA-Z]+×2\/\d+(\.\d+)?[a-zA-Z\/²]+\)$/,
+             "ME=PEg+KE":/^\d+(\.\d+)?[a-zA-Z\/²]+\+\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "ME=KE+PEg":/^\d+(\.\d+)?[a-zA-Z\/²]+\+\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "KE=ME-PEg":/^\d+(\.\d+)?[a-zA-Z\/²]+\-\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "PEg=ME-KE":/^\d+(\.\d+)?[a-zA-Z\/²]+\-\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "P=W/t": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "t=W/P": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "ƒ=1/T": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "T=1/ƒ": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "W=Pt": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "W=tP": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "W=Fd": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "W=dF": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "λ=ν/ƒ": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "ƒ=ν/λ": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "t=Δv/a": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "Δv=Δp/m": /^\d+(\.\d+)?[a-zA-Z\/²·]+\/\d+(\.\d+)?[a-zA-Z\/²·]+$/,
+             "λ=νT": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "λ=Tv": /^\d+(\.\d+)?[a-zA-Z\/²]+×\d+(\.\d+)?[a-zA-Z\/²]+$/,
+             "T=λ/ν": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
+        // Add other patterns here...
+    };
+        function backspaceInput() {
+        currentValue = currentValue.slice(0, -1); // Update currentValue
+        parent.postMessage({ action: 'input', value: currentValue }, '*');
+    }
+       
         function clearInput() {
             currentValue = '';
             document.getElementById('feedback').textContent = ''; // Clear feedback
@@ -67,15 +182,104 @@
         }
 
         function validate() {
-            const isValid = currentValue === 'a+b=2';
-            const feedback = document.getElementById('feedback');
-            feedback.textContent = isValid ? 'Correct!' : 'Incorrect!';
-            feedback.style.color = isValid ? 'green' : 'red';
+            const output = document.getElementById("output").value.trim();
+            const feedback = document.getElementById("feedback");
+
+            // Step 1: Validate the variable and "="
+            const variableMatch = /^([a-zA-ZΔλνƒ]+)=/.exec(output);
+            if (!variableMatch) {
+                feedback.textContent = "Invalid variable or missing '='.";
+                feedback.className = "invalid";
+                return;
+            }
+
+            const variable = variableMatch[1];
+            if (!validVariables.includes(variable)) {
+                feedback.textContent = `Invalid variable: ${variable}`;
+                feedback.className = "invalid";
+                return;
+            }
+
+            // Step 2: Validate the formula
+            const parts = output.split("=");
+            if (parts.length < 3) {
+                feedback.textContent = "Invalid format: Ensure the formula and substitution are complete.";
+                feedback.className = "invalid";
+                return;
+            }
+
+            const formula = parts[1];
+            if (!validFormulas.includes(`${variable}=${formula}`)) {
+                feedback.textContent = `Invalid formula: ${formula}`;
+                feedback.className = "invalid";
+                return;
+            }
+
+            // Step 3: Validate the substitution
+            const substitution = parts[2];
+            const key = `${variable}=${formula}`;
+            if (substitutionPatterns[key] && !substitutionPatterns[key].test(substitution)) {
+                feedback.textContent = `Invalid substitution: ${substitution}`;
+                feedback.className = "invalid";
+                return;
+            }
+
+            // Step 4: Validate the answer
+            if (parts.length < 4) {
+                feedback.textContent = "Missing answer. Ensure an answer is provided after the last '='.";
+                feedback.className = "invalid";
+                return;
+            }
+
+            const answer = parts[3];
+            if (!answerPattern.test(answer)) {
+                feedback.textContent = "Invalid answer format. Ensure the answer includes a number and valid unit.";
+                feedback.className = "invalid";
+                return;
+            }
+
+            // All validations pass
+            feedback.textContent = "Valid input! All checks passed.";
+            feedback.className = "valid";
         }
+        // Key configurations
+        const keysConfig = {
+            variables: ['s', 'd', 't', 'v', 'a', 'Δv', 'm', 'F', 'g', 'h', 'p', 'J', 'Δp', 'W', 'PEg', 'KE', 'ME', 'P', 'λ', 'ƒ', 'v (italicized)', 'T'],
+            operations: ['(', ')', '+', '-', '×', '/', '=', '^2', '√'],
+            units: ['m', 's', 'm/s', 'm/s²', 'kg', 'N', 'kg·m/s', 'N·s', 'J', 'W', 'Hz'],
+            numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.']
+        };
+
+        // Render keys dynamically
+        function renderKeys(sectionId, keys) {
+            const section = document.getElementById(sectionId);
+            keys.forEach(key => {
+                const keyElement = document.createElement('div');
+                keyElement.className = 'key';
+
+                // Add italics for wave velocity key
+                if (key === 'v (italicized)') {
+                    keyElement.textContent = 'v';
+                    keyElement.classList.add('italic');
+                } else {
+                    keyElement.textContent = key;
+                }
+
+                keyElement.onclick = () => appendToOutput(key === 'v (italicized)' ? 'v' : key);
+                section.appendChild(keyElement);
+            });
+        }
+
 
         function closeKeyboard() {
             parent.postMessage({ action: 'close' }, '*');
         }
+               // Render all keys
+        renderKeys('variables-section', keysConfig.variables);
+        renderKeys('operations-section', keysConfig.operations);
+        renderKeys('units-section', keysConfig.units);
+        renderKeys('numbers-section', keysConfig.numbers);
+
     </script>
 </body>
 </html>
