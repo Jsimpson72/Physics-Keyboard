@@ -53,11 +53,11 @@
     <div id="feedback"></div>
 
     <script>
-        let currentValue = ''; // Local state for the keyboard
+        let currentValue = ''; // Tracks the current input locally
 
         function addKey(key) {
             currentValue += key;
-            parent.postMessage({ action: 'update', value: currentValue }, '*');
+            parent.postMessage({ action: 'input', value: currentValue }, '*');
         }
 
         function clearInput() {
@@ -71,7 +71,6 @@
             const feedback = document.getElementById('feedback');
             feedback.textContent = isValid ? 'Correct!' : 'Incorrect!';
             feedback.style.color = isValid ? 'green' : 'red';
-            parent.postMessage({ action: 'validate', value: isValid }, '*');
         }
 
         function closeKeyboard() {
@@ -80,4 +79,3 @@
     </script>
 </body>
 </html>
-
