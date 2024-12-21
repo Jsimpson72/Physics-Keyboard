@@ -99,20 +99,19 @@
             }
         }
 
-        // Append key value to field
-        document.querySelectorAll('.key').forEach((key) => {
-            key.addEventListener('click', () => {
-                if (!key.classList.contains('action-key')) {
-                    updateParentField(key.textContent);
-                }
-            });
-        });
+        // Keyboard buttons functionality
+document.querySelectorAll('.key').forEach((key) => {
+    key.addEventListener('click', () => {
+        const value = key.textContent.trim();
+        window.parent.postMessage({ action: 'input', value }, '*');
+    });
+});
 
-        // Clear input
-        document.getElementById('clear-button').addEventListener('click', () => {
-            updateParentField('');
-            document.getElementById('feedback').textContent = '';
-        });
+// Clear button functionality
+document.getElementById('clear-button').addEventListener('click', () => {
+    window.parent.postMessage({ action: 'clear' }, '*');
+});
+
 
         // Validate input
         document.getElementById('validate-button').addEventListener('click', () => {
