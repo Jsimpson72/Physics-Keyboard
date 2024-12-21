@@ -80,9 +80,6 @@
 
                 // Send validated input to parent page
                 parent.postMessage({ action: "input", value: input }, "*");
-
-                // Optional: clear input after validation or close keyboard
-                inputField.value = '';
             } else {
                 feedback.textContent = "Incorrect. Please try again.";
                 feedback.style.color = "red";
