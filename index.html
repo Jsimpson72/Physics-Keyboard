@@ -3,89 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simplified Keyboard</title>
+    <title>Virtual Keyboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .keyboard-container {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
-        #output {
-            font-size: 18px;
-            width: 300px;
-            padding: 10px;
-            margin: 20px 0;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-        }
+
         .key {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px 20px;
-            background-color: #007bff;
+            padding: 15px;
+            font-size: 18px;
+            background: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 18px;
         }
+
         .key:hover {
-            background-color: #0056b3;
+            background: #0056b3;
         }
-        .button-container {
-            margin-top: 20px;
+
+        .action-key {
+            background: #6c757d;
         }
+
+        .action-key:hover {
+            background: #5a6268;
+        }
+
         #feedback {
-            margin-top: 20px;
-            font-size: 18px;
+            margin-top: 10px;
+            font-size: 16px;
         }
+
         .valid {
             color: green;
         }
+
         .invalid {
             color: red;
         }
     </style>
 </head>
 <body>
-    <h1>Simple Keyboard</h1>
-    <input id="output" type="text" readonly />
-    <div>
-        <button class="key" onclick="appendToOutput('a')">a</button>
-        <button class="key" onclick="appendToOutput('b')">b</button>
-        <button class="key" onclick="appendToOutput('+')">+</button>
-        <button class="key" onclick="appendToOutput('=')">=</button>
-        <button class="key" onclick="appendToOutput('2')">2</button>
+    <div class="keyboard-container">
+        <!-- Keys -->
+        <button class="key">a</button>
+        <button class="key">b</button>
+        <button class="key">+</button>
+        <button class="key">=</button>
+        <button class="key">2</button>
+
+        <!-- Action Buttons -->
+        <button id="clear-button" class="key action-key">Clear</button>
+        <button id="validate-button" class="key action-key">Validate</button>
     </div>
-    <div class="button-container">
-        <button class="key" onclick="validate()">Validate</button>
-        <button class="key" onclick="clearInput()">Clear</button>
-    </div>
+
+    <!-- Feedback Section -->
     <div id="feedback"></div>
+
     <script>
-        const outputField = document.getElementById('output');
-        const feedbackField = document.getElementById('feedback');
+        // Store reference to parent field
+        let inputField = null;
 
-        function appendToOutput(value) {
-            outputField.value += value;
-        }
+        // Listen for messages from parent page
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'initializeKeyboard') {
+                inputField = event.data.field;
+            }
+        });
 
-        function clearInput() {
-            outputField.value = '';
-            feedbackField.textContent = '';
-        }
-
-        function validate() {
-            const validFormula = 'a+b=2';
-            if (outputField.value === validFormula) {
-                feedbackField.textContent = 'Correct!';
-                feedbackField.className = 'valid';
-            } else {
-                feedbackField.textContent = 'Incorrect. Please try again.';
-                feedbackField.className = 'invalid';
+        // Update input field in parent
+        function updateParentField(value) {
+            if (inputField) {
+                window.parent.postMessage({ type: 'updateField', value }, '*');
             }
         }
+
+        // Append key value to field
+        document.querySelectorAll('.key').forEach((key) => {
+            key.addEventListener('click', () => {
+                if (!key.classList.contains('action-key')) {
+                    updateParentField(key.textContent);
+                }
+            });
+        });
+
+        // Clear input
+        document.getElementById('clear-button').addEventListener('click', () => {
+            updateParentField('');
+            document.getElementById('feedback').textContent = '';
+        });
+
+        // Validate input
+        document.getElementById('validate-button').addEventListener('click', () => {
+            const fieldValue = inputField || '';
+            const feedback = document.getElementById('feedback');
+            if (fieldValue === 'a+b=2') {
+                feedback.textContent = 'Correct!';
+                feedback.className = 'valid';
+            } else {
+                feedback.textContent = 'Incorrect. Please try again.';
+                feedback.className = 'invalid';
+            }
+        });
     </script>
 </body>
 </html>
