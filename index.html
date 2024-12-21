@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Keyboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #output {
+            font-size: 18px;
+            width: 300px;
+            padding: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .key {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .key:hover {
+            background-color: #0056b3;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Keyboard</h1>
+    <input id="output" type="text" readonly />
+    <div>
+        <button class="key" onclick="appendToOutput('a')">a</button>
+        <button class="key" onclick="appendToOutput('b')">b</button>
+        <button class="key" onclick="appendToOutput('+')">+</button>
+        <button class="key" onclick="appendToOutput('=')">=</button>
+        <button class="key" onclick="appendToOutput('2')">2</button>
+    </div>
+    <div class="button-container">
+        <button class="key" onclick="validate()">Validate</button>
+        <button class="key" onclick="clearInput()">Clear</button>
+    </div>
+    <div id="feedback"></div>
+    <script>
+        const outputField = document.getElementById('output');
+        const feedbackField = document.getElementById('feedback');
+
+        function appendToOutput(value) {
+            outputField.value += value;
+        }
+
+        function clearInput() {
+            outputField.value = '';
+            feedbackField.textContent = '';
+        }
+
+        function validate() {
+            const validFormula = 'a+b=2';
+            if (outputField.value === validFormula) {
+                feedbackField.textContent = 'Correct!';
+                feedbackField.className = 'valid';
+            } else {
+                feedbackField.textContent = 'Incorrect. Please try again.';
+                feedbackField.className = 'invalid';
+            }
+        }
+    </script>
+</body>
+</html>
