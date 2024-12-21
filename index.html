@@ -170,10 +170,18 @@
              "T=λ/ν": /^\d+(\.\d+)?[a-zA-Z\/²]+\/\d+(\.\d+)?[a-zA-Z\/²]+$/,
         // Add other patterns here...
     };
+        const answerPattern = /^\d+(\.\d+)?[a-zA-Z\/²·]+$/;
+        function addKey(key) {
+            currentValue += key;
+            parent.postMessage({ action: 'input', value: currentValue }, '*');
+            document.getElementById('feedback').textContent = ''; // Clear feedback
+        }
+
         function backspaceInput() {
-        currentValue = currentValue.slice(0, -1); // Update currentValue
-        parent.postMessage({ action: 'input', value: currentValue }, '*');
-    }
+            currentValue = currentValue.slice(0, -1);
+            parent.postMessage({ action: 'input', value: currentValue }, '*');
+            document.getElementById('feedback').textContent = ''; // Clear feedback
+        }
        
         function clearInput() {
             currentValue = '';
@@ -182,7 +190,7 @@
         }
 
         function validate() {
-            const output = document.getElementById("output").value.trim();
+            const output = currentValue.trim();
             const feedback = document.getElementById("feedback");
 
             // Step 1: Validate the variable and "="
