@@ -11,9 +11,6 @@
             margin: 0;
             padding: 20px;
         }
-        input {
-            display: none; /* Hide internal keyboard input field */
-        }
         button {
             padding: 10px 20px;
             font-size: 18px;
@@ -33,21 +30,30 @@
             background-color: #007bff;
             color: white;
         }
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <h1>Physics Keyboard</h1>
-    <button class="key" onclick="addKey('a')">a</button>
-    <button class="key" onclick="addKey('+')">+</button>
-    <button class="key" onclick="addKey('b')">b</button>
-    <button class="key" onclick="addKey('=')">=</button>
-    <button class="key" onclick="addKey('2')">2</button>
-    <br>
-    <button class="validate" onclick="validate()">Validate</button>
-    <button class="clear" onclick="clearInput()">Clear</button>
+    <div>
+        <button class="key" onclick="addKey('a')">a</button>
+        <button class="key" onclick="addKey('+')">+</button>
+        <button class="key" onclick="addKey('b')">b</button>
+        <button class="key" onclick="addKey('=')">=</button>
+        <button class="key" onclick="addKey('2')">2</button>
+    </div>
+    <div>
+        <button class="validate" onclick="validate()">Validate</button>
+        <button class="clear" onclick="clearInput()">Clear</button>
+        <button onclick="closeKeyboard()">Close</button>
+    </div>
+    <div id="feedback"></div>
 
     <script>
-        let currentValue = ''; // Local keyboard state
+        let currentValue = ''; // Local state for the keyboard
 
         function addKey(key) {
             currentValue += key;
@@ -56,12 +62,20 @@
 
         function clearInput() {
             currentValue = '';
+            document.getElementById('feedback').textContent = ''; // Clear feedback
             parent.postMessage({ action: 'clear' }, '*');
         }
 
         function validate() {
             const isValid = currentValue === 'a+b=2';
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = isValid ? 'Correct!' : 'Incorrect!';
+            feedback.style.color = isValid ? 'green' : 'red';
             parent.postMessage({ action: 'validate', value: isValid }, '*');
+        }
+
+        function closeKeyboard() {
+            parent.postMessage({ action: 'close' }, '*');
         }
     </script>
 </body>
