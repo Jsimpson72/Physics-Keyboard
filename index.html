@@ -54,15 +54,15 @@
 
     <script>
         function sendInput(value) {
-            window.parent.postMessage({ action: 'input', value }, '*');
+            parent.postMessage({ action: 'input', value }, '*');
         }
 
         function sendClear() {
-            window.parent.postMessage({ action: 'clear' }, '*');
+            parent.postMessage({ action: 'clear' }, '*');
         }
 
         function sendValidate() {
-            window.parent.postMessage({ action: 'validate' }, '*');
+            parent.postMessage({ action: 'validate' }, '*');
         }
     </script>
 </body>
