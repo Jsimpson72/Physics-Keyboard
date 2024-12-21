@@ -11,75 +11,57 @@
             margin: 0;
             padding: 20px;
         }
-        .input-field {
-            font-size: 20px;
-            padding: 10px;
-            width: 300px;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        input {
+            display: none; /* Hide internal keyboard input field */
         }
         button {
             padding: 10px 20px;
             font-size: 18px;
+            margin: 5px;
+            border-radius: 5px;
             cursor: pointer;
+        }
+        .validate {
+            background-color: green;
+            color: white;
+        }
+        .clear {
+            background-color: red;
+            color: white;
+        }
+        .key {
             background-color: #007bff;
             color: white;
-            border: none;
-            border-radius: 5px;
-            margin: 10px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <h1>Physics Keyboard</h1>
-    <input id="keyboardInput" class="input-field" readonly />
-    <div>
-        <button onclick="addKey('a')">a</button>
-        <button onclick="addKey('+')">+</button>
-        <button onclick="addKey('b')">b</button>
-        <button onclick="addKey('=')">=</button>
-        <button onclick="addKey('2')">2</button>
-    </div>
-    <button onclick="clearInput()">Clear</button>
-    <button onclick="validate()">Validate</button>
-    <p id="feedback"></p>
+    <button class="key" onclick="addKey('a')">a</button>
+    <button class="key" onclick="addKey('+')">+</button>
+    <button class="key" onclick="addKey('b')">b</button>
+    <button class="key" onclick="addKey('=')">=</button>
+    <button class="key" onclick="addKey('2')">2</button>
+    <br>
+    <button class="validate" onclick="validate()">Validate</button>
+    <button class="clear" onclick="clearInput()">Clear</button>
 
     <script>
-        const inputField = document.getElementById("keyboardInput");
-        const feedback = document.getElementById("feedback");
+        let currentValue = ''; // Local keyboard state
 
         function addKey(key) {
-            inputField.value += key;
+            currentValue += key;
+            parent.postMessage({ action: 'update', value: currentValue }, '*');
         }
 
         function clearInput() {
-            inputField.value = '';
-            feedback.textContent = '';
+            currentValue = '';
+            parent.postMessage({ action: 'clear' }, '*');
         }
 
         function validate() {
-            const input = inputField.value.trim();
-            const isValid = input === "a+b=2"; // Replace with actual validation logic
-
-            if (isValid) {
-                feedback.textContent = "Correct! Entry validated.";
-                feedback.style.color = "green";
-
-                // Send validated input to parent
-                parent.postMessage({ action: "input", value: input }, "*");
-            } else {
-                feedback.textContent = "Incorrect. Please try again.";
-                feedback.style.color = "red";
-            }
+            const isValid = currentValue === 'a+b=2';
+            parent.postMessage({ action: 'validate', value: isValid }, '*');
         }
     </script>
 </body>
